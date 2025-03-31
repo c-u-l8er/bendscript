@@ -1,7 +1,7 @@
 defmodule TextClassifierExampleTest do
   use ExUnit.Case
 
-  test "can train and classify text correctly" do
+  test "can train and classify text correctly with custom configuration" do
     # Define initial vocabulary and categories
     vocabulary = [
       "price",
@@ -32,8 +32,46 @@ defmodule TextClassifierExampleTest do
 
     categories = ["price", "quality", "shipping", "service"]
 
-    # Create classifier
-    classifier = TextClassifier.new(vocabulary, categories)
+    # Define custom configuration
+    custom_config = %{
+      key_terms: %{
+        "price" => ["price", "cost", "money", "expensive", "cheap", "budget"],
+        "quality" => ["quality", "excellent", "poor", "good", "bad", "satisfied"],
+        "shipping" => ["shipping", "delivery", "fast", "slow", "delay", "arrived"],
+        "service" => ["service", "customer", "help", "support", "refund", "return"]
+      },
+      boost_weights: %{
+        # Higher weight for positive matches
+        positive_match: 0.25,
+        # Stronger penalty for negative matches
+        negative_match: -0.2,
+        # Stronger category-specific boost
+        category_boost: 0.35,
+        # Faster decay for unused words
+        unused_decay: -0.02,
+        # Higher multiplier for category-specific terms
+        category_multiplier: 2.0
+      },
+      confidence_values: %{
+        positive_match: 0.85,
+        negative_match: 0.75,
+        category_boost: 0.95,
+        unused_decay: 0.35
+      },
+      parameters: %{
+        # Higher initial weights
+        initial_weight: 0.15,
+        # Faster learning rate
+        update_rate: 0.15,
+        # Less momentum to allow faster adaptation
+        momentum: 0.8,
+        # Higher pruning threshold
+        prune_threshold: 0.05
+      }
+    }
+
+    # Create classifier with custom configuration
+    classifier = TextClassifier.new(vocabulary, categories, custom_config)
 
     # Create training documents
     training_docs = [
@@ -149,12 +187,44 @@ defmodule TextClassifierExampleTest do
     important_words = TextClassifier.important_features(trained_classifier)
     assert length(important_words) > 0, "Model should have identified important features"
 
-    # Verify some key words are in the important features
-    key_words = ["price", "quality", "shipping", "service"]
+    # Verify that key words from the config are in the important features
+    key_words =
+      Enum.flat_map(custom_config.key_terms, fn {_category, words} -> words end)
+      |> Enum.uniq()
+      # Just check a few key words
+      |> Enum.take(4)
+
     important_word_keys = Enum.map(important_words, fn {word, _weight} -> word end)
 
     for word <- key_words do
       assert word in important_word_keys, "Expected '#{word}' to be an important feature"
     end
+  end
+
+  test "classifier works with minimal configuration" do
+    # Minimal vocabulary and categories
+    vocabulary = ["good", "bad", "fast", "slow"]
+    categories = ["positive", "negative"]
+
+    # Create classifier with default configuration
+    classifier = TextClassifier.new(vocabulary, categories)
+
+    # Simple training data
+    training_docs = [
+      TextClassifier.TextData.document("This is good.", %{}, "positive"),
+      TextClassifier.TextData.document("That was bad.", %{}, "negative"),
+      TextClassifier.TextData.document("Very fast service.", %{}, "positive"),
+      TextClassifier.TextData.document("Too slow response.", %{}, "negative")
+    ]
+
+    # Train classifier
+    trained_classifier = TextClassifier.train(classifier, training_docs, 5)
+
+    # Test cases
+    {category, _} = TextClassifier.classify(trained_classifier, "It was good and fast")
+    assert category == "positive"
+
+    {category, _} = TextClassifier.classify(trained_classifier, "Too bad and slow")
+    assert category == "negative"
   end
 end

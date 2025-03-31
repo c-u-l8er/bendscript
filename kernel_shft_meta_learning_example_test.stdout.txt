@@ -1,36 +1,42 @@
 Compiling 1 file (.ex)
 
-12:46:29.607 [debug] Constructor: :document, meta: [line: 8], args: [{:text, [line: 8], nil}, {:features, [line: 8], nil}, {:category, [line: 8], nil}]
+13:17:41.155 [debug] Constructor: :document, meta: [line: 8], args: [{:text, [line: 8], nil}, {:features, [line: 8], nil}, {:category, [line: 8], nil}]
 
-12:46:29.608 [debug] Constructor: :classifier, meta: [line: 9], args: [{:model, [line: 9], nil}, {:vocabulary, [line: 9], nil}, {:categories, [line: 9], nil}]
+13:17:41.157 [debug] Constructor: :classifier, meta: [line: 9], args: [{:model, [line: 9], nil}, {:vocabulary, [line: 9], nil}, {:categories, [line: 9], nil}, {:config, [line: 9], nil}]
 
-12:46:29.608 [debug] Constructor: :feature, meta: [line: 10], args: [{:name, [line: 10], nil}, {:weight, [line: 10], nil}]
+13:17:41.157 [debug] Constructor: :feature, meta: [line: 10], args: [{:name, [line: 10], nil}, {:weight, [line: 10], nil}]
 warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
-  lib/abstract_pov/text_classifier.ex:32: TextClassifier.new/2
-
-warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
-  lib/abstract_pov/text_classifier.ex:48: TextClassifier.new/2
+  lib/abstract_pov/text_classifier.ex:103: TextClassifier.create_heuristics/2
 
 warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
-  lib/abstract_pov/text_classifier.ex:77: TextClassifier.new/2
+  lib/abstract_pov/text_classifier.ex:117: TextClassifier.create_heuristics/2
 
 warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
-  lib/abstract_pov/text_classifier.ex:107: TextClassifier.new/2
+  lib/abstract_pov/text_classifier.ex:136: TextClassifier.create_heuristics/2
+
+warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:156: TextClassifier.create_heuristics/2
+
+warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:169: TextClassifier.create_heuristics/2
 
 warning: variable "data_points" is unused (if the variable is not meant to be used, prefix it with an underscore)
-  lib/abstract_pov/text_classifier.ex:157: TextClassifier.new/2
+  lib/abstract_pov/text_classifier.ex:229: TextClassifier.create_meta_rules/1
 
 warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
-  lib/abstract_pov/text_classifier.ex:157: TextClassifier.new/2
+  lib/abstract_pov/text_classifier.ex:229: TextClassifier.create_meta_rules/1
 
 warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
-  lib/abstract_pov/text_classifier.ex:189: TextClassifier.new/2
+  lib/abstract_pov/text_classifier.ex:263: TextClassifier.create_meta_rules/1
 
 warning: variable "features" is unused (if the variable is not meant to be used, prefix it with an underscore)
-  lib/abstract_pov/text_classifier.ex:294: TextClassifier.prepare_dataset/2
+  lib/abstract_pov/text_classifier.ex:358: TextClassifier.prepare_dataset/2
 
 warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
-  lib/abstract_pov/text_classifier.ex:294: TextClassifier.prepare_dataset/2
+  lib/abstract_pov/text_classifier.ex:358: TextClassifier.prepare_dataset/2
+
+warning: variable "category_boost" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:418: TextClassifier.classify/2
 
 warning: variable "data_points" is unused (if the variable is not meant to be used, prefix it with an underscore)
   lib/kernel_shtf/meta_learning/evidence.ex:9
@@ -400,8 +406,8 @@ warning: unused alias Evidence
 
 Excluding tags: [:skip]
 
-.
-Finished in 0.04 seconds (0.00s async, 0.04s sync)
-1 test, 0 failures
+..
+Finished in 0.05 seconds (0.00s async, 0.05s sync)
+2 tests, 0 failures
 
-Randomized with seed 760053
+Randomized with seed 360524
