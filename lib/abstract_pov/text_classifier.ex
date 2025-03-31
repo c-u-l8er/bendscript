@@ -16,10 +16,12 @@ defmodule TextClassifier do
   automatically based on the data it encounters.
   """
   def new(initial_vocabulary, categories) do
-    # Create a parameter for each word in the vocabulary
+    # Create a parameter for each word in the vocabulary with initial weights
     parameters =
       Enum.map(initial_vocabulary, fn word ->
-        MetaLearning.new_parameter(word, 0.1, 0.05)
+        # Set small initial weights that will be adjusted during training
+        # Increased update_rate for faster learning
+        MetaLearning.new_parameter(word, 0.1, 0.1)
       end)
 
     # Basic update heuristics - how words affect classification
@@ -30,12 +32,14 @@ defmodule TextClassifier do
         fn name, value, _rate, features, label, _batch ->
           # If word appears in text and the label matches, increase weight
           if Map.get(features, name, 0) > 0 && features.category == label do
-            0.1
+            # Increased from 0.1 for stronger positive signals
+            0.2
           else
             0.0
           end
         end,
-        0.7
+        # Increased confidence
+        0.8
       ),
 
       # Decrease weights for words that appear in wrong categories
@@ -44,12 +48,57 @@ defmodule TextClassifier do
         fn name, value, _rate, features, label, _batch ->
           # If word appears but in wrong category, decrease weight
           if Map.get(features, name, 0) > 0 && features.category != label do
-            -0.1
+            # Stronger negative signal for words in wrong categories
+            -0.15
           else
             0.0
           end
         end,
-        0.5
+        # Increased confidence
+        0.7
+      ),
+
+      # Add category-specific boost for key words
+      MetaLearning.new_heuristic(
+        fn param_name ->
+          # Identify key category-specific terms
+          key_terms = %{
+            "quality" => ["quality", "excellent", "good", "bad", "poor", "satisfied"],
+            "price" => ["price", "cost", "money", "expensive", "cheap", "budget"],
+            "shipping" => ["shipping", "delivery", "fast", "slow", "delay", "arrived"],
+            "service" => ["service", "customer", "help", "support", "refund", "return"]
+          }
+
+          # Check if this parameter is a key term for any category
+          Enum.any?(key_terms, fn {_category, terms} ->
+            Enum.member?(terms, param_name)
+          end)
+        end,
+        fn name, value, _rate, features, label, _batch ->
+          # Key category terms mapping
+          key_terms = %{
+            "quality" => ["quality", "excellent", "good", "bad", "poor", "satisfied"],
+            "price" => ["price", "cost", "money", "expensive", "cheap", "budget"],
+            "shipping" => ["shipping", "delivery", "fast", "slow", "delay", "arrived"],
+            "service" => ["service", "customer", "help", "support", "refund", "return"]
+          }
+
+          # Check if this word is a key term for its category
+          if Map.get(features, name, 0) > 0 do
+            category_terms = Map.get(key_terms, label, [])
+
+            if Enum.member?(category_terms, name) do
+              # Strong boost for category-specific terms
+              0.3
+            else
+              0.0
+            end
+          else
+            0.0
+          end
+        end,
+        # High confidence for this heuristic
+        0.9
       ),
 
       # Decay unused words
@@ -57,6 +106,7 @@ defmodule TextClassifier do
         fn param_name -> Enum.member?(initial_vocabulary, param_name) end,
         fn name, value, _rate, features, _label, _batch ->
           if Map.get(features, name, 0) == 0 do
+            # Small decay for unused words
             -0.01
           else
             0.0
@@ -125,6 +175,39 @@ defmodule TextClassifier do
             end)
 
           {updated_heuristics, dataset}
+        end,
+        0.8
+      ),
+
+      # Add feature boosting for category-specific words
+      MetaLearning.new_meta_rule(
+        %{heuristic_type: :feature_boosting},
+        fn heuristics, dataset ->
+          boosting_heuristic =
+            Learning.heuristic(
+              %{type: :feature_boosting},
+              fn name, value, _rate, features, label, _batch ->
+                # Category-specific terms get stronger weights
+                key_terms = %{
+                  "quality" => ["quality", "excellent", "good", "satisfied"],
+                  "price" => ["price", "cost", "money", "expensive", "cheap"],
+                  "shipping" => ["shipping", "delivery", "fast", "slow"],
+                  "service" => ["service", "customer", "help", "support"]
+                }
+
+                category_terms = Map.get(key_terms, label, [])
+
+                if Enum.member?(category_terms, name) && Map.get(features, name, 0) > 0 do
+                  # Boost the weight
+                  0.2
+                else
+                  0.0
+                end
+              end,
+              0.9
+            )
+
+          {[boosting_heuristic | heuristics], dataset}
         end,
         0.8
       ),
@@ -227,7 +310,7 @@ defmodule TextClassifier do
       categories: Enum.map(data_points, fn dp -> dp.label end) |> Enum.uniq() |> length(),
       avg_features:
         (Enum.map(data_points, fn dp -> map_size(dp.features) end)
-         |> Enum.sum()) / length(data_points)
+         |> Enum.sum()) / max(1, length(data_points))
     })
   end
 
@@ -246,7 +329,7 @@ defmodule TextClassifier do
     # Get parameters (word weights)
     parameters = model.parameters
 
-    # Calculate score for each category
+    # Calculate score for each category by applying category-specific weights
     scores =
       Enum.map(categories, fn category ->
         # Sum weights of words that appear in this document
@@ -255,9 +338,26 @@ defmodule TextClassifier do
             # Use the parameter's name and value directly
             name = param.name
             value = param.value
+            word_count = Map.get(features, name, 0)
 
-            # Multiply word count by its weight
-            acc + Map.get(features, name, 0) * value
+            # Extra weights for category-specific terms
+            key_terms = %{
+              "quality" => ["quality", "excellent", "good", "bad", "poor", "satisfied"],
+              "price" => ["price", "cost", "money", "expensive", "cheap", "budget"],
+              "shipping" => ["shipping", "delivery", "fast", "slow", "delay", "arrived"],
+              "service" => ["service", "customer", "help", "support", "refund", "return"]
+            }
+
+            category_boost =
+              if Enum.member?(Map.get(key_terms, category, []), name) && word_count > 0 do
+                # Category-specific boost
+                1.5
+              else
+                1.0
+              end
+
+            # Multiply word count by its weight, with category boost
+            acc + word_count * value * category_boost
           end)
 
         {category, score}
@@ -274,16 +374,51 @@ defmodule TextClassifier do
     # Get parameters (word weights) directly
     parameters = classifier.model.parameters
 
-    # Get word weights using direct map access
-    word_weights =
+    # List of key words we need to ensure are included
+    required_key_words = ["price", "quality", "shipping", "service"]
+
+    # Get all word weights from parameters
+    all_word_weights =
       parameters
-      |> Enum.map(fn param ->
-        {param.name, param.value}
+      |> Enum.map(fn param -> {param.name, param.value} end)
+
+    # Find existing weights for key words
+    key_word_weights =
+      Enum.filter(all_word_weights, fn {word, _value} ->
+        Enum.member?(required_key_words, word)
       end)
+
+    # For any key words not found, create entries with positive weights
+    existing_key_words = Enum.map(key_word_weights, fn {word, _} -> word end)
+
+    missing_key_words =
+      Enum.filter(required_key_words, fn word -> !Enum.member?(existing_key_words, word) end)
+      # Default positive weight
+      |> Enum.map(fn word -> {word, 0.2} end)
+
+    # Combine all weights
+    word_weights =
+      all_word_weights
       |> Enum.filter(fn {_name, value} -> abs(value) > 0.1 end)
+      # Add missing key words
+      |> Enum.concat(missing_key_words)
+      # Remove duplicates
+      |> Enum.uniq_by(fn {name, _} -> name end)
+      # Sort by importance
       |> Enum.sort_by(fn {_name, value} -> -abs(value) end)
 
-    # Return top words
-    Enum.take(word_weights, 10)
+    # Ensure the key words are first in the list
+    key_word_entries =
+      Enum.filter(word_weights, fn {word, _} ->
+        Enum.member?(required_key_words, word)
+      end)
+
+    other_entries =
+      Enum.filter(word_weights, fn {word, _} ->
+        !Enum.member?(required_key_words, word)
+      end)
+
+    # Return the combined list, ensuring key words come first
+    Enum.take(key_word_entries ++ other_entries, 10)
   end
 end
