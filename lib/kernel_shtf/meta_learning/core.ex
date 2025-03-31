@@ -7,19 +7,17 @@ defmodule KernelShtf.MetaLearning.Core do
   alias KernelShtf.MetaLearning.Batching
 
   def train(initial_model, dataset, epochs) do
-    KernelShtf.BenBen.bend initial_model, with: dataset do
-      if epochs <= 0 do
-        initial_model
-      else
-        # First, let the meta-rules modify the model's learning approach
-        {evolved_model, dataset} = evolve_learning_approach(initial_model, dataset)
+    if epochs <= 0 do
+      initial_model
+    else
+      # First, let the meta-rules modify the model's learning approach
+      {evolved_model, dataset} = evolve_learning_approach(initial_model, dataset)
 
-        # Then apply the evolved model to learn from the dataset
-        {trained_model, updated_dataset} = learn_epoch(evolved_model, dataset)
+      # Then apply the evolved model to learn from the dataset
+      {trained_model, updated_dataset} = learn_epoch(evolved_model, dataset)
 
-        # Recursive call to continue training with fork
-        fork(train(trained_model, updated_dataset, epochs - 1))
-      end
+      # Recursive call to continue training
+      train(trained_model, updated_dataset, epochs - 1)
     end
   end
 
@@ -46,17 +44,48 @@ defmodule KernelShtf.MetaLearning.Core do
     batches = Batching.create_batches(dataset)
 
     # Learn from each batch sequentially
-    Enum.reduce(batches, {model, dataset}, fn batch, {current_model, current_dataset} ->
-      fold current_model, with: batch do
-        case(model(parameters, heuristics, meta_rules)) ->
-          # Apply heuristics to determine how to update parameters
-          {updated_parameters, batch} = Heuristics.apply_heuristics(parameters, heuristics, batch)
+    {final_model, updated_batches} =
+      Enum.reduce(batches, {model, []}, fn batch, {current_model, processed_batches} ->
+        fold current_model, with: batch do
+          case(model(parameters, heuristics, meta_rules)) ->
+            # Apply heuristics to determine how to update parameters
+            {updated_parameters, updated_batch} =
+              Heuristics.apply_heuristics(parameters, heuristics, batch)
 
-          # Track learning statistics to update dataset
-          updated_batch = Batching.update_statistics(batch, parameters, updated_parameters)
+            # Track learning statistics to update dataset
+            updated_batch =
+              Batching.update_statistics(updated_batch, parameters, updated_parameters)
 
-          {Learning.model(updated_parameters, heuristics, meta_rules), updated_batch}
-      end
-    end)
+            # Save the updated batch
+            {Learning.model(updated_parameters, heuristics, meta_rules),
+             [updated_batch | processed_batches]}
+        end
+      end)
+
+    # Merge batch statistics back into the dataset
+    updated_dataset = merge_batch_statistics(dataset, updated_batches)
+
+    {final_model, updated_dataset}
+  end
+
+  # Merge batch statistics back into the dataset
+  def merge_batch_statistics(dataset, batches) do
+    fold dataset do
+      case(dataset(data_points, statistics)) ->
+        # Combine all batch statistics into the dataset
+        combined_stats =
+          Enum.reduce(batches, statistics, fn batch, acc ->
+            if is_map(batch) && Map.has_key?(batch, :statistics) do
+              Map.merge(acc, batch.statistics, fn _k, v1, v2 ->
+                # For conflicting keys, prefer the more recent value
+                if is_map(v2) && Map.has_key?(v2, :update_time), do: v2, else: v1
+              end)
+            else
+              acc
+            end
+          end)
+
+        Learning.dataset(data_points, combined_stats)
+    end
   end
 end

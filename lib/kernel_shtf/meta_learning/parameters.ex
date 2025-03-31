@@ -104,10 +104,10 @@ defmodule KernelShtf.MetaLearning.Parameters do
   def apply_heuristic_to_parameter(heuristic, name, value, update_rate, dataset) do
     case heuristic do
       %{variant: :heuristic, action: action, confidence: confidence} ->
-        # Apply the action to get new value
-        fold action, with: {value, dataset} do
-          case(action) ->
-            # Execute the action function to compute new value
+        # Check what kind of action we have
+        cond do
+          # If it's a function, execute it directly
+          is_function(action) ->
             result = execute_action(action, name, value, update_rate, dataset)
 
             # Scale update by confidence level and learning rate
@@ -117,10 +117,31 @@ defmodule KernelShtf.MetaLearning.Parameters do
             scaled_value = value + (current_value - value) * confidence * update_rate
 
             {scaled_value, current_dataset}
+
+          # If action is a map, handle it accordingly
+          is_map(action) ->
+            result = execute_action(action, name, value, update_rate, dataset)
+
+            # Scale update by confidence level and learning rate
+            current_value = elem(result, 0)
+            current_dataset = elem(result, 1)
+
+            scaled_value = value + (current_value - value) * confidence * update_rate
+
+            {scaled_value, current_dataset}
+
+          # For any other action type
+          true ->
+            # Use the action as is or provide a default
+            {value, dataset}
         end
 
       # If no matching heuristic, return original value
       nil ->
+        {value, dataset}
+
+      # Any other case
+      _ ->
         {value, dataset}
     end
   end

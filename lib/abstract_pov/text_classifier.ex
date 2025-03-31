@@ -186,18 +186,19 @@ defmodule TextClassifier do
   Train the classifier on a set of documents
   """
   def train(classifier, documents, epochs \\ 5) do
-    fold classifier do
-      case(classifier(model, vocabulary, categories)) ->
-        # Convert documents to dataset
-        dataset =
-          prepare_dataset(documents, vocabulary)
+    # Manually extract the necessary parts from the classifier
+    model = classifier.model
+    vocabulary = classifier.vocabulary
+    categories = classifier.categories
 
-        # Train using the meta-learning system
-        trained_model = MetaLearning.train(model, dataset, epochs)
+    # Convert documents to dataset
+    dataset = prepare_dataset(documents, vocabulary)
 
-        # Return updated classifier
-        TextData.classifier(trained_model, vocabulary, categories)
-    end
+    # Train using the meta-learning system
+    trained_model = MetaLearning.train(model, dataset, epochs)
+
+    # Create a new classifier with the trained model
+    TextData.classifier(trained_model, vocabulary, categories)
   end
 
   @doc """
@@ -234,60 +235,55 @@ defmodule TextClassifier do
   Classify a new document
   """
   def classify(classifier, text) do
-    fold classifier do
-      case(classifier(model, vocabulary, categories)) ->
-        # Extract features
-        features = extract_features(text, vocabulary)
+    # Extract model, vocabulary and categories directly using map access
+    model = classifier.model
+    vocabulary = classifier.vocabulary
+    categories = classifier.categories
 
-        # Get parameters (word weights)
-        parameters = model.parameters
+    # Extract features
+    features = extract_features(text, vocabulary)
 
-        # Calculate score for each category
-        scores =
-          Enum.map(categories, fn category ->
-            # Sum weights of words that appear in this document
-            score =
-              parameters
-              |> Enum.map(fn param ->
-                fold param do
-                  case(parameter(name, value, _rate)) ->
-                    # Multiply word count by its weight
-                    Map.get(features, name, 0) * value
-                end
-              end)
-              |> Enum.sum()
+    # Get parameters (word weights)
+    parameters = model.parameters
 
-            {category, score}
+    # Calculate score for each category
+    scores =
+      Enum.map(categories, fn category ->
+        # Sum weights of words that appear in this document
+        score =
+          Enum.reduce(parameters, 0, fn param, acc ->
+            # Use the parameter's name and value directly
+            name = param.name
+            value = param.value
+
+            # Multiply word count by its weight
+            acc + Map.get(features, name, 0) * value
           end)
 
-        # Return category with highest score
-        Enum.max_by(scores, fn {_category, score} -> score end)
-    end
+        {category, score}
+      end)
+
+    # Return category with highest score
+    Enum.max_by(scores, fn {_category, score} -> score end)
   end
 
   @doc """
   Extract the most important words for each category
   """
   def important_features(classifier) do
-    fold classifier do
-      case(classifier(model, vocabulary, categories)) ->
-        # Get parameters (word weights)
-        parameters = model.parameters
+    # Get parameters (word weights) directly
+    parameters = classifier.model.parameters
 
-        # Get word weights
-        word_weights =
-          parameters
-          |> Enum.map(fn param ->
-            fold param do
-              case(parameter(name, value, _rate)) ->
-                {name, value}
-            end
-          end)
-          |> Enum.filter(fn {_name, value} -> abs(value) > 0.1 end)
-          |> Enum.sort_by(fn {_name, value} -> -abs(value) end)
+    # Get word weights using direct map access
+    word_weights =
+      parameters
+      |> Enum.map(fn param ->
+        {param.name, param.value}
+      end)
+      |> Enum.filter(fn {_name, value} -> abs(value) > 0.1 end)
+      |> Enum.sort_by(fn {_name, value} -> -abs(value) end)
 
-        # Return top words
-        Enum.take(word_weights, 10)
-    end
+    # Return top words
+    Enum.take(word_weights, 10)
   end
 end

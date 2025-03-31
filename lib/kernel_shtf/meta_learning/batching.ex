@@ -13,7 +13,8 @@ defmodule KernelShtf.MetaLearning.Batching do
         data_points
         |> Enum.chunk_every(batch_size)
         |> Enum.map(fn chunk ->
-          Learning.batch(chunk, batch_size)
+          # Use the 3-parameter version with empty statistics
+          Learning.batch(chunk, batch_size, %{})
         end)
     end
   end
@@ -36,15 +37,22 @@ defmodule KernelShtf.MetaLearning.Batching do
 
   # Update batch statistics based on parameter updates
   def update_statistics(batch, old_parameters, new_parameters) do
-    fold batch do
-      case(batch(data_subset, batch_size)) ->
-        # Calculate parameter changes
-        param_changes = calculate_parameter_changes(old_parameters, new_parameters)
+    # Check if batch has the proper structure
+    if batch[:variant] == :batch do
+      # Calculate parameter changes
+      param_changes = calculate_parameter_changes(old_parameters, new_parameters)
 
-        # Update batch statistics with these changes
-        updated_stats = batch_stats_update(batch, param_changes)
+      # Update batch statistics with these changes
+      data_subset = batch[:data_subset]
+      batch_size = batch[:batch_size]
 
-        Learning.batch(data_subset, batch_size, updated_stats)
+      # Update batch statistics with these changes
+      updated_stats = batch_stats_update(batch, param_changes)
+
+      Learning.batch(data_subset, batch_size, updated_stats)
+    else
+      # Return the batch unchanged if it doesn't have the expected structure
+      batch
     end
   end
 
@@ -53,14 +61,17 @@ defmodule KernelShtf.MetaLearning.Batching do
     # Zip parameters together and calculate differences
     Enum.zip(old_params, new_params)
     |> Enum.map(fn {old, new} ->
-      fold old do
-        case(parameter(name, old_value, _)) ->
-          fold new do
-            case(parameter(^name, new_value, _)) ->
-              {name, new_value - old_value}
-          end
+      # Handle direct map access instead of fold pattern matching
+      if old[:variant] == :parameter && new[:variant] == :parameter &&
+           old[:name] == new[:name] do
+        {old[:name], new[:value] - old[:value]}
+      else
+        # Default case for unmatched parameters
+        {nil, 0.0}
       end
     end)
+    # Remove any nil entries
+    |> Enum.reject(fn {name, _} -> is_nil(name) end)
     |> Enum.into(%{})
   end
 
@@ -78,5 +89,17 @@ defmodule KernelShtf.MetaLearning.Batching do
       })
 
     updated_stats
+  end
+
+  def batch_to_dataset(batch) do
+    if is_map(batch) && Map.has_key?(batch, :variant) && batch.variant == :batch do
+      Learning.dataset(
+        batch.data_subset,
+        Map.get(batch, :statistics, %{})
+      )
+    else
+      # Return a default dataset if input is invalid
+      Learning.dataset([], %{})
+    end
   end
 end

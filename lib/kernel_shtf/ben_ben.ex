@@ -271,16 +271,31 @@ defmodule KernelShtf.BenBen do
     end)
   end
 
-  def do_fold(%{variant: variant_type} = data, state, fun) when is_function(fun) do
-    # Logger.debug(
-    #   "do_fold called with data: #{inspect(data)}, variant_type: #{inspect(variant_type)}, state: #{inspect(state)}"
-    # )
+  def do_fold(data, state, fun) when is_function(fun) do
+    cond do
+      is_map(data) && Map.has_key?(data, :variant) ->
+        # Process recursive fields first for variant types
+        {processed, new_state} = process_recursive_fields(data, state, fun)
 
-    # Process recursive fields first
-    {processed, new_state} = process_recursive_fields(data, state, fun)
+        # Apply fun to processed data, maintaining the full structure
+        fun.(processed, new_state)
 
-    # Apply fun to processed data, maintaining the full structure
-    fun.(processed, new_state)
+      is_map(data) ->
+        # For maps without variant tag, pass it through
+        if state == nil do
+          fun.(data, nil)
+        else
+          fun.(data, state)
+        end
+
+      true ->
+        # For other non-variant data, pass it through
+        if state == nil do
+          fun.(data, nil)
+        else
+          fun.(data, state)
+        end
+    end
   end
 
   # Add new clause for when the third argument is not a function

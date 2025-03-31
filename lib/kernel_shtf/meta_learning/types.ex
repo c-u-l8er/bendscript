@@ -9,7 +9,7 @@ defmodule KernelShtf.MetaLearning.Types do
     metaRule(pattern, recu(transformation), priority)
     dataPoint(features, label)
     dataset(data_points, statistics)
-    batch(data_subset, batch_size)
+    batch(data_subset, batch_size, statistics)
     learningEvidence(patterns, effectiveness, surprise)
   end
 end

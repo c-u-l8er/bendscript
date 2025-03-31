@@ -33,21 +33,28 @@ defmodule KernelShtf.MetaLearning.Heuristics do
     # Meta-meta-learning: rules that modify the meta-rules
     evidence = Evidence.extract_learning_evidence(dataset)
 
-    fold meta_rules, with: dataset do
-      case(metaRule(pattern, transformation, priority)) ->
+    # Use Enum.map instead of fold with custom pattern matching
+    new_meta_rules =
+      Enum.map(meta_rules, fn meta_rule ->
+        # Extract fields directly
+        pattern = Map.get(meta_rule, :pattern)
+        transformation = Map.get(meta_rule, :transformation)
+        priority = Map.get(meta_rule, :priority)
+
         # Based on evidence, meta-rules can modify themselves
         if should_adapt_rule?(pattern, evidence) do
           # Create a variant of the rule with modified transformation
-          new_transformation =
-            fork(Transformations.evolve_transformation(transformation, evidence))
-
+          new_transformation = Transformations.evolve_transformation(transformation, evidence)
           new_priority = Transformations.calculate_new_priority(priority, pattern, evidence)
 
-          {Learning.metaRule(pattern, new_transformation, new_priority), dataset}
+          Learning.metaRule(pattern, new_transformation, new_priority)
         else
-          {Learning.metaRule(pattern, transformation, priority), dataset}
+          # Keep the original rule
+          meta_rule
         end
-    end
+      end)
+
+    {new_meta_rules, dataset}
   end
 
   # Apply heuristics to update parameters based on data
@@ -125,25 +132,37 @@ defmodule KernelShtf.MetaLearning.Heuristics do
 
   # Check if a heuristic applies to a specific data point
   def heuristic_applies_to_data?(heuristic, data_point) do
-    fold heuristic do
-      case(heuristic(condition, _action, _confidence)) ->
-        fold data_point do
-          case(dataPoint(features, label)) ->
-            # Check if condition matches features/label
-            cond do
-              is_function(condition, 2) ->
-                condition.(features, label)
+    # Direct map pattern matching since fold with case isn't working properly
+    if heuristic[:variant] == :heuristic do
+      condition = heuristic[:condition]
 
-              is_map(condition) && Map.has_key?(condition, :feature_matcher) ->
-                condition.feature_matcher.(features)
+      if data_point[:variant] == :dataPoint do
+        features = data_point[:features]
+        label = data_point[:label]
 
-              is_map(condition) && Map.has_key?(condition, :label_matcher) ->
-                condition.label_matcher.(label)
+        # Check if condition matches features/label
+        cond do
+          is_function(condition, 2) ->
+            condition.(features, label)
 
-              true ->
-                false
-            end
+          is_function(condition, 1) ->
+            condition.(features[:category])
+
+          is_map(condition) && Map.has_key?(condition, :feature_matcher) ->
+            condition.feature_matcher.(features)
+
+          is_map(condition) && Map.has_key?(condition, :label_matcher) ->
+            condition.label_matcher.(label)
+
+          true ->
+            # Default to true for simple conditions that don't explicitly match data
+            true
         end
+      else
+        false
+      end
+    else
+      false
     end
   end
 
@@ -198,30 +217,32 @@ defmodule KernelShtf.MetaLearning.Heuristics do
 
   # Calculate the delta for a parameter update
   def calculate_parameter_delta(action, name, current_value, features, label, batch) do
-    fold action do
-      case(action) ->
-        cond do
-          is_function(action, 5) ->
-            # Action is a function that takes parameter info and data point info
-            delta = action.(name, current_value, features, label, batch)
-            {delta, batch}
+    cond do
+      is_function(action, 6) ->
+        # Action takes name, value, rate, features, label, batch
+        delta = action.(name, current_value, 0.1, features, label, batch)
+        {delta, batch}
 
-          is_map(action) && Map.has_key?(action, :gradient_function) ->
-            # Action computes gradient based on features and label
-            gradient = action.gradient_function.(features, label, current_value)
-            {gradient, batch}
+      is_function(action, 5) ->
+        # Action takes name, value, features, label, batch
+        delta = action.(name, current_value, features, label, batch)
+        {delta, batch}
 
-          is_map(action) && Map.has_key?(action, :error_function) ->
-            # Action computes error and derives update from it
-            predicted = apply_prediction(current_value, features)
-            error = action.error_function.(predicted, label)
-            # Negative error for gradient descent
-            {-error, batch}
+      is_map(action) && Map.has_key?(action, :gradient_function) ->
+        # Action computes gradient based on features and label
+        gradient = action.gradient_function.(features, label, current_value)
+        {gradient, batch}
 
-          # Default: no change
-          true ->
-            {0.0, batch}
-        end
+      is_map(action) && Map.has_key?(action, :error_function) ->
+        # Action computes error and derives update from it
+        predicted = apply_prediction(current_value, features)
+        error = action.error_function.(predicted, label)
+        # Negative error for gradient descent
+        {-error, batch}
+
+      # Default: no change
+      true ->
+        {0.0, batch}
     end
   end
 
@@ -240,9 +261,17 @@ defmodule KernelShtf.MetaLearning.Heuristics do
 
   # Extract data points from a batch
   def extract_data_points(batch) do
-    fold batch do
-      case(batch(data_subset, _batch_size)) ->
+    case batch do
+      %{variant: :batch, data_subset: data_subset} ->
         data_subset
+
+      # Handle the case where batch is already a list of data points
+      data_subset when is_list(data_subset) ->
+        data_subset
+
+      # Fallback
+      _ ->
+        []
     end
   end
 

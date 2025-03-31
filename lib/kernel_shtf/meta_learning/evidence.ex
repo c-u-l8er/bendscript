@@ -4,14 +4,25 @@ defmodule KernelShtf.MetaLearning.Evidence do
 
   # Extract learning evidence from dataset for meta-rule adaptation
   def extract_learning_evidence(dataset) do
-    fold dataset do
-      case(dataset(data_points, statistics)) ->
-        # Analyze statistics to extract patterns, effectiveness and surprises
+    # Handle both dataset and batch structures
+    case dataset do
+      %{variant: :dataset, data_points: data_points, statistics: statistics} ->
+        # Process dataset structure directly
         patterns = extract_learning_patterns(statistics)
         effectiveness = calculate_learning_effectiveness(statistics)
         surprise = measure_learning_surprise(statistics)
-
         Learning.learningEvidence(patterns, effectiveness, surprise)
+
+      %{variant: :batch, statistics: statistics} ->
+        # Process batch structure
+        patterns = extract_learning_patterns(statistics)
+        effectiveness = calculate_learning_effectiveness(statistics)
+        surprise = measure_learning_surprise(statistics)
+        Learning.learningEvidence(patterns, effectiveness, surprise)
+
+      _ ->
+        # For any other structure, create empty evidence
+        Learning.learningEvidence(%{}, 0.5, %{score: 0.0, details: %{}})
     end
   end
 
