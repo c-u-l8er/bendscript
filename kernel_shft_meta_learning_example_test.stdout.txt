@@ -1,0 +1,474 @@
+Compiling 1 file (.ex)
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/core.ex:28: KernelShtf.MetaLearning.Core.evolve_learning_approach/2
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/core.ex:50: KernelShtf.MetaLearning.Core.learn_epoch/2
+
+warning: variable "current_dataset" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/core.ex:49: KernelShtf.MetaLearning.Core.learn_epoch/2
+
+warning: unused alias Evidence
+  lib/kernel_shtf/meta_learning/core.ex:6
+
+warning: KernelShtf.BenBen.bend/3 is undefined or private. Did you mean:
+
+      * bend/2
+
+  lib/kernel_shtf/meta_learning/core.ex:10: KernelShtf.MetaLearning.Core.train/3
+
+warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:30
+
+warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:44
+
+warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:58
+
+warning: variable "data_points" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:107
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:107
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:189
+
+warning: variable "features" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:210
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:210
+
+warning: variable "state" is unused (there is a variable with the same name in the context, use the pin operator (^) to match on it or prefix this variable with underscore if it is not meant to be used)
+  lib/abstract_pov/text_classifier.ex:252
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:237
+
+warning: variable "state" is unused (there is a variable with the same name in the context, use the pin operator (^) to match on it or prefix this variable with underscore if it is not meant to be used)
+  lib/abstract_pov/text_classifier.ex:281
+
+warning: variable "categories" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:272
+
+warning: variable "vocabulary" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:272
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/text_classifier.ex:272
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/batching.ex:7
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/batching.ex:39
+
+warning: variable "^" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/batching.ex:58
+
+warning: variable "state" is unused (there is a variable with the same name in the context, use the pin operator (^) to match on it or prefix this variable with underscore if it is not meant to be used)
+  lib/kernel_shtf/meta_learning/batching.ex:58
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/batching.ex:56
+
+warning: KernelShtf.MetaLearning.Types.Learning.batch/3 is undefined or private. Did you mean:
+
+      * batch/2
+
+  lib/kernel_shtf/meta_learning/batching.ex:47
+
+warning: variable "expression" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/bridge_imo/mecha_cyph/exec_battle.ex:43
+
+warning: unused import KernelShtf.BenBen
+  lib/bridge_imo/mecha_cyph/exec_battle.ex:3
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/parameters.ex:29
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/parameters.ex:55
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/parameters.ex:108
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/parameters.ex:191
+
+warning: variable "data_points" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/parameters.ex:208
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/parameters.ex:208
+
+warning: variable "opts" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abc_law/mecha_cyph.ex:10
+
+warning: variable "drum" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abc_law/mecha_cyph.ex:92
+
+warning: variable "event" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abc_law/mecha_cyph.ex:92
+
+warning: variable "results" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abc_law/mecha_cyph.ex:158
+
+warning: variable "opts" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/concrete_irl/graffiti/persistance.ex:64
+
+warning: variable "tx_id" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/concrete_irl/graffiti/persistance.ex:76
+
+warning: variable "tx_id" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/concrete_irl/graffiti/persistance.ex:86
+
+warning: variable "where_clause" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/bridge_imo/cypher/cypher_executer.ex:84
+
+warning: variable "var" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/bridge_imo/cypher/cypher_executer.ex:117
+
+warning: variable "var" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/bridge_imo/cypher/cypher_executer.ex:129
+
+warning: Logger.warn/1 is deprecated. Use Logger.warning/2 instead
+  lib/bridge_imo/cypher/cypher_executer.ex:220
+
+warning: function parse_create_and_return/1 is unused
+  lib/bridge_imo/cypher/cypher_executer.ex:115
+
+warning: function parse_create_pattern/1 is unused
+  lib/bridge_imo/cypher/cypher_executer.ex:226
+
+warning: function parse_match_and_return/1 is unused
+  lib/bridge_imo/cypher/cypher_executer.ex:127
+
+warning: function parse_node/2 is unused
+  lib/bridge_imo/cypher/cypher_executer.ex:287
+
+warning: function parse_node_match/1 is unused
+  lib/bridge_imo/cypher/cypher_executer.ex:318
+
+warning: function parse_node_simple/1 is unused
+  lib/bridge_imo/cypher/cypher_executer.ex:100
+
+warning: function parse_pattern/1 is unused
+  lib/bridge_imo/cypher/cypher_executer.ex:242
+
+warning: function parse_property/2 is unused
+  lib/bridge_imo/cypher/cypher_executer.ex:250
+
+warning: module attribute @red_duration was set but never used
+  lib/abc_law/intersection_signal.ex:6
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/transformations.ex:8
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/transformations.ex:64
+
+warning: variable "surprise" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/transformations.ex:78
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/transformations.ex:146
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/transformations.ex:219
+
+warning: variable "state" is unused (there is a variable with the same name in the context, use the pin operator (^) to match on it or prefix this variable with underscore if it is not meant to be used)
+  lib/kernel_shtf/meta_learning/transformations.ex:255
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/transformations.ex:247
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/transformations.ex:287
+
+warning: variable "surprise" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/transformations.ex:342
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/transformations.ex:342
+
+warning: variable "data_points" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/evidence.ex:7
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/evidence.ex:7
+
+warning: variable "slope" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/evidence.ex:307
+
+warning: variable "priority" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:12
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:12
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:36
+
+warning: variable "data_points" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:120
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:120
+
+warning: variable "state" is unused (there is a variable with the same name in the context, use the pin operator (^) to match on it or prefix this variable with underscore if it is not meant to be used)
+  lib/kernel_shtf/meta_learning/heuristics.ex:130
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:128
+
+warning: variable "state" is unused (there is a variable with the same name in the context, use the pin operator (^) to match on it or prefix this variable with underscore if it is not meant to be used)
+  lib/kernel_shtf/meta_learning/heuristics.ex:154
+
+warning: variable "condition" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:152
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:152
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:176
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:201
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:243
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/meta_learning/heuristics.ex:251
+
+warning: unused alias Parameters
+  lib/kernel_shtf/meta_learning/heuristics.ex:5
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prototypal.ex:19
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prototypal.ex:73
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prototypal.ex:87
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/parents.ex:26
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/parents.ex:38
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/parents.ex:128
+
+warning: function merge_counts/2 is unused
+  lib/abstract_pov/parents.ex:75
+
+warning: function merge_with_level_increment/2 is unused
+  lib/abstract_pov/parents.ex:80
+
+warning: unused alias QueryBuilder
+  lib/bridge_imo/mecha_cyph/queries/spaceship_queries.ex:6
+
+warning: incompatible types:
+
+    map() !~ :s
+
+in expression:
+
+    # lib/bridge_imo/mecha_cyph/queries/spaceship_queries.ex:41
+    s.properties
+
+where "s" was given the type :s in:
+
+    # lib/bridge_imo/mecha_cyph/queries/spaceship_queries.ex:40
+    s = :s
+
+where "s" was given the type map() (due to calling var.field) in:
+
+    # lib/bridge_imo/mecha_cyph/queries/spaceship_queries.ex:41
+    s.properties
+
+HINT: "var.field" (without parentheses) implies "var" is a map() while "var.fun()" (with parentheses) implies "var" is an atom()
+
+Conflict found at
+  lib/bridge_imo/mecha_cyph/queries/spaceship_queries.ex:41
+
+warning: incompatible types:
+
+    map() !~ :s
+
+in expression:
+
+    # lib/bridge_imo/mecha_cyph/queries/spaceship_queries.ex:51
+    s.properties
+
+where "s" was given the type :s in:
+
+    # lib/bridge_imo/mecha_cyph/queries/spaceship_queries.ex:50
+    s = :s
+
+where "s" was given the type map() (due to calling var.field) in:
+
+    # lib/bridge_imo/mecha_cyph/queries/spaceship_queries.ex:51
+    s.properties
+
+HINT: "var.field" (without parentheses) implies "var" is a map() while "var.fun()" (with parentheses) implies "var" is an atom()
+
+Conflict found at
+  lib/bridge_imo/mecha_cyph/queries/spaceship_queries.ex:51
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/chain.ex:40
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/chain.ex:47
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/chain.ex:67
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/chain.ex:81
+
+warning: variable "head" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/chain.ex:115
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/chain.ex:115
+
+warning: clauses with the same name and arity (number of arguments) should be grouped together, "def reverse/1" was previously defined (lib/abstract_pov/chain.ex:96)
+  lib/abstract_pov/chain.ex:122
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/chain.ex:153
+
+warning: this clause for reverse/1 cannot match because a previous clause at line 96 always matches
+  lib/abstract_pov/chain.ex:122
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/simple_graph.ex:16
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/simple_graph.ex:26
+
+warning: variable "edges" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/simple_graph.ex:45
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/simple_graph.ex:45
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/simple_graph.ex:52
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/simple_graph.ex:82
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:25
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:46
+
+warning: variable "edge_list" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:72
+
+warning: variable "metadata" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:72
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:72
+
+warning: variable "vertex_map" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:82
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:82
+
+warning: variable "vertex" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:103
+
+warning: variable "metadata" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:99
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:99
+
+warning: variable "metadata" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:113
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:113
+
+warning: variable "metadata" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:125
+
+warning: variable "state" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/abstract_pov/prop_graph.ex:125
+
+warning: variable "metadata" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/concrete_irl/graffiti.ex:154
+
+warning: variable "state" is unused (there is a variable with the same name in the context, use the pin operator (^) to match on it or prefix this variable with underscore if it is not meant to be used)
+  lib/concrete_irl/graffiti.ex:154
+
+warning: Logger.warn/1 is deprecated. Use Logger.warning/2 instead
+  lib/concrete_irl/graffiti.ex:324
+
+warning: variable "name" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/gov.ex:17
+
+warning: you must require Logger before invoking the macro Logger.debug/1
+  lib/bridge_imo/mecha_cyph/query_builder.ex:5
+
+warning: you must require Logger before invoking the macro Logger.debug/1
+  lib/bridge_imo/mecha_cyph/query_builder.ex:10
+
+warning: clauses with the same name and arity (number of arguments) should be grouped together, "defp generate_fold_cases/2" was previously defined (lib/kernel_shtf/ben_ben.ex:140)
+  lib/kernel_shtf/ben_ben.ex:177
+
+warning: variable "variant_type" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/ben_ben.ex:274
+
+warning: variable "variant_type" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/ben_ben.ex:287
+
+warning: variable "other" is unused (if the variable is not meant to be used, prefix it with an underscore)
+  lib/kernel_shtf/ben_ben.ex:393
+
+warning: function extract_bindings/1 is unused
+  lib/kernel_shtf/ben_ben.ex:256
+
+warning: function generate_pattern_match/1 is unused
+  lib/kernel_shtf/ben_ben.ex:231
+
+warning: this clause for generate_fold_cases/2 cannot match because a previous clause at line 140 always matches
+  lib/kernel_shtf/ben_ben.ex:177
+
+warning: this clause for generate_fold_cases/2 cannot match because a previous clause at line 140 always matches
+  lib/kernel_shtf/ben_ben.ex:181
+
+Excluding tags: [:skip]
+
+
+
+  1) test can train and classify text correctly (TextClassifierExampleTest)
+     test/kernel_shtf/meta_learning/example_test.exs:4
+     ** (CaseClauseError) no case clause matching: %{parameters: [%{name: "price", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "cost", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "money", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "expensive", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "cheap", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "budget", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "quality", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "excellent", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "poor", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "good", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "bad", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "satisfied", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "shipping", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "delivery", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "fast", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "slow", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "delay", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "arrived", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "return", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "refund", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "customer", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "service", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "help", value: 0.1, variant: :parameter, update_rate: 0.05}, %{name: "support", value: 0.1, variant: :parameter, update_rate: 0.05}], heuristics: [%{action: #Function<5.55662742/6 in TextClassifier.new/2>, variant: :heuristic, condition: #Function<4.55662742/1 in TextClassifier.new/2>, confidence: 0.7}, %{action: #Function<7.55662742/6 in TextClassifier.new/2>, variant: :heuristic, condition: #Function<6.55662742/1 in TextClassifier.new/2>, confidence: 0.5}, %{action: #Function<9.55662742/6 in TextClassifier.new/2>, variant: :heuristic, condition: #Function<8.55662742/1 in TextClassifier.new/2>, confidence: 0.3}], meta_rules: [%{priority: 0.7, pattern: %{param_name: :any, expected_pattern: :convergence}, variant: :metaRule, transformation: #Function<10.55662742/2 in TextClassifier.new/2>}, %{priority: 0.8, pattern: %{param_name: :any, expected_pattern: :oscillation}, variant: :metaRule, transformation: #Function<11.55662742/2 in TextClassifier.new/2>}, %{priority: 0.5, pattern: %{heuristic_type: :feature_pruning}, variant: :metaRule, transformation: #Function<12.55662742/2 in TextClassifier.new/2>}], variant: :model}
+     code: trained_classifier = TextClassifier.train(classifier, training_docs, 10)
+     stacktrace:
+       (bendscript 0.1.0) lib/abstract_pov/text_classifier.ex:189: anonymous fn/4 in TextClassifier.train/3
+       (bendscript 0.1.0) lib/kernel_shtf/ben_ben.ex:324: anonymous fn/3 in KernelShtf.BenBen.process_recursive_fields/3
+       (elixir 1.15.8) lib/enum.ex:2510: Enum."-reduce/3-lists^foldl/2-0-"/3
+       (bendscript 0.1.0) lib/kernel_shtf/ben_ben.ex:280: KernelShtf.BenBen.do_fold/3
+       test/kernel_shtf/meta_learning/example_test.exs:130: (test)
+
+
+Finished in 0.02 seconds (0.00s async, 0.02s sync)
+1 test, 1 failure
+
+Randomized with seed 904923
