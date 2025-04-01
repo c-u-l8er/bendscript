@@ -207,13 +207,11 @@ defmodule KernelShtf.MetaLearning.Heuristics do
     value = param[:value]
     update_rate = param[:update_rate]
 
-    IO.puts("DEBUG: Updating parameter '#{name}' with current value #{value}")
-    IO.puts("DEBUG: Features: #{inspect(features)}")
-    IO.puts("DEBUG: Label: #{inspect(label)}")
+    # Only log parameter updates when significant changes occur
+    debug_enabled = System.get_env("DEBUG_META_LEARNING") == "true"
 
-    # Apply action to calculate parameter delta - IMPORTANT FIX
+    # Apply action to calculate parameter delta
     delta_result = calculate_parameter_delta(action, name, value, features, label, batch)
-    IO.puts("DEBUG: Calculated delta result: #{inspect(delta_result)}")
 
     # Ensure delta_result is properly processed
     {delta_value, updated_batch} = case delta_result do
@@ -227,14 +225,17 @@ defmodule KernelShtf.MetaLearning.Heuristics do
 
     # Scale update by confidence and learning rate
     scaled_delta = delta_value * confidence * update_rate
-    IO.puts("DEBUG: Scaled delta: #{scaled_delta} (confidence: #{confidence}, update_rate: #{update_rate})")
 
     # Force a more significant update for learning progress
     effective_delta = if abs(scaled_delta) < 0.001, do: sign(scaled_delta) * 0.001, else: scaled_delta
 
     # Create updated parameter with the new value
     updated_param = %{param | value: value + effective_delta}
-    IO.puts("DEBUG: Updated value: #{value + effective_delta}")
+
+    # Only log significant updates to reduce verbosity
+    if debug_enabled && abs(effective_delta) > 0.01 do
+      IO.puts("Param update: #{name} = #{value} → #{value + effective_delta} (Δ: #{effective_delta})")
+    end
 
     {updated_param, updated_batch}
   end
@@ -283,8 +284,7 @@ defmodule KernelShtf.MetaLearning.Heuristics do
         # Direct delta specification
         {action.delta, batch}
 
-      # DEFAULT CASE - This is the critical fix:
-      # Word occurrence-based update with more aggressive learning
+      # FIXED DEFAULT CASE - Make learning more adaptive and consider context
       true ->
         # Check if this word appears in features
         word_count = Map.get(features, name, 0)
@@ -294,27 +294,81 @@ defmodule KernelShtf.MetaLearning.Heuristics do
         label_str = if is_atom(label), do: Atom.to_string(label), else: label
         category_str = if is_atom(category), do: Atom.to_string(category), else: category
 
+        # Get category-specific configuration if available
+        config = extract_config_from_batch(batch)
+        key_terms = get_key_terms_for_category(config, label_str)
+
         cond do
-          # Word appears in document with matching category
+          # Word appears and matches correct category - strong positive signal
           word_count > 0 && category_str == label_str ->
-            # Word appears in correct category - positive update
-            {0.2, batch}  # Increased from 0.1 to 0.2
+            # Boost if it's a key term for this category
+            boost = if name in key_terms, do: 1.5, else: 1.0
+            {0.5 * boost, batch}
 
-          # Word appears but with wrong category
+          # Word appears but in wrong category - strong negative signal
           word_count > 0 && category_str != label_str ->
-            # Word appears in wrong category - negative update
-            {-0.1, batch}  # Increased magnitude from -0.05 to -0.1
+            # Stronger negative for key terms in wrong categories
+            penalty = if in_category_terms?(name, label_str, batch), do: 1.5, else: 1.0
+            {-0.3 * penalty, batch}
 
-          # Word appears in category's key terms list but isn't in document
+          # Expected term missing in this category - modest decay
           word_count == 0 && in_category_terms?(name, label_str, batch) ->
-            # Small decay for expected but missing words
-            {-0.05, batch}
+            {-0.1, batch}
 
-          # Word doesn't appear at all
+          # Unused term - slight decay
           true ->
-            # Tiny decay for completely unused words
-            {-0.01, batch}
+            # More aggressive decay for advanced stages
+            decay = case get_learning_stage(batch) do
+              stage when stage > 3 -> -0.04  # More aggressive in later stages
+              _ -> -0.02
+            end
+            {decay, batch}
         end
+    end
+  end
+
+  # Helper to extract config from batch
+  def extract_config_from_batch(batch) do
+    cond do
+      is_map(batch) && Map.has_key?(batch, :statistics) &&
+        is_map(batch.statistics) && Map.has_key?(batch.statistics, :config) ->
+        batch.statistics.config
+      is_map(batch) && Map.has_key?(batch, :config) ->
+        batch.config
+      true ->
+        %{key_terms: %{}}
+    end
+  end
+
+  # Helper to get key terms for a category
+  def get_key_terms_for_category(config, category) do
+    case Map.get(config, :key_terms, %{}) do
+      key_terms when is_map(key_terms) ->
+        Map.get(key_terms, category, [])
+      _ ->
+        []
+    end
+  end
+
+  # Helper to estimate the learning stage based on batch statistics
+  def get_learning_stage(batch) do
+    if is_map(batch) && Map.has_key?(batch, :statistics) do
+      case Map.get(batch.statistics, :learning_stage) do
+        nil ->
+          # Estimate stage based on other indicators
+          parameter_count = Map.get(batch.statistics, :parameter_count, 0)
+          meta_rule_count = Map.get(batch.statistics, :meta_rule_count, 0)
+          cond do
+            meta_rule_count > 2 -> 6  # Meta-learning stage
+            parameter_count > 20 -> 4  # Network stage
+            parameter_count > 10 -> 3  # Branch stage
+            true -> 2  # Sprout stage
+          end
+        stage when is_number(stage) -> stage
+        _ -> 2  # Default to sprout stage
+      end
+    else
+      2  # Default to sprout stage
     end
   end
 

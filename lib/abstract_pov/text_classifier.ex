@@ -10,6 +10,10 @@ defmodule TextClassifier do
     feature(name, weight)
   end
 
+  # Make classifier constructor public by re-exporting it
+  # This line is missing in your code and causing the error
+  defdelegate classifier(model, vocabulary, categories, config), to: TextData
+
   @doc """
   Creates a new text classifier with meta-learning capabilities.
   The classifier adjusts its feature weights and selection strategy
@@ -322,7 +326,7 @@ defmodule TextClassifier do
     # Ensure we have text to process
     text = if text == "", do: "empty", else: text
 
-    IO.puts("DEBUG: Extracting features from text: #{inspect(text)}")
+    debug_enabled = System.get_env("DEBUG_META_LEARNING") == "true"
 
     # Tokenize text - added better tokenization
     words =
@@ -332,23 +336,22 @@ defmodule TextClassifier do
       |> String.split(~r/\s+/)
       |> Enum.filter(&(&1 != ""))  # Remove empty strings
 
-    IO.puts("DEBUG: Tokenized words: #{inspect(words)}")
-    IO.puts("DEBUG: Vocabulary to match: #{inspect(vocabulary)}")
-
     # Count occurrences of vocabulary words
     features =
       Enum.reduce(vocabulary, %{}, fn word, acc ->
         count = Enum.count(words, &(&1 == word))
         # Only add words that actually appear
         if count > 0 do
-          IO.puts("DEBUG: Found word '#{word}' with count #{count}")
           Map.put(acc, word, count)
         else
           acc
         end
       end)
 
-    IO.puts("DEBUG: Extracted features: #{inspect(features)}")
+    # Minimal logging of feature extraction
+    if debug_enabled && map_size(features) > 0 do
+      IO.puts("Extracted #{map_size(features)} features from text")
+    end
 
     # Preserve original text if available
     features =
@@ -372,17 +375,15 @@ defmodule TextClassifier do
     categories = classifier.categories
     config = classifier.config
 
-    IO.puts("DEBUG: Training classifier with #{length(documents)} documents for #{epochs} epochs")
+    debug_enabled = System.get_env("DEBUG_META_LEARNING") == "true"
+
+    # Minimal logging during training
+    if debug_enabled do
+      IO.puts("Training classifier with #{length(documents)} documents for #{epochs} epochs")
+    end
 
     # Convert documents to dataset
     dataset = prepare_dataset(documents, vocabulary)
-    IO.puts("DEBUG: Dataset prepared with #{length(dataset.data_points)} data points")
-
-    # Debug the first data point
-    if length(dataset.data_points) > 0 do
-      first_point = List.first(dataset.data_points)
-      IO.puts("DEBUG: First data point - Label: #{inspect(first_point.label)}, Features: #{inspect(first_point.features)}")
-    end
 
     # Get initial weights for comparison
     initial_weights = Enum.map(model.parameters, fn
@@ -390,14 +391,8 @@ defmodule TextClassifier do
       param -> {param[:name], param[:value]}
     end) |> Enum.into(%{})
 
-    IO.puts("DEBUG: Initial weights: #{inspect(initial_weights)}")
-
     # Train using the meta-learning system
     trained_model = MetaLearning.train(model, dataset, epochs)
-
-    # Debug parameter changes
-    IO.puts("DEBUG: Initial param count: #{length(model.parameters)}")
-    IO.puts("DEBUG: Trained param count: #{length(trained_model.parameters)}")
 
     # Get final weights
     final_weights = Enum.map(trained_model.parameters, fn
@@ -405,23 +400,25 @@ defmodule TextClassifier do
       param -> {param[:name], param[:value]}
     end) |> Enum.into(%{})
 
-    IO.puts("DEBUG: Final weights: #{inspect(final_weights)}")
+    # Only log significant weight changes to reduce verbosity
+    if debug_enabled do
+      weight_changes = Enum.filter(final_weights, fn {name, value} ->
+        original = Map.get(initial_weights, name, 0.0)
+        abs(value - original) > 0.05  # Only show significant changes
+      end)
+      |> Enum.sort_by(fn {_, value} -> -abs(value) end)
+      |> Enum.take(5)  # Only show top 5 changes
+      |> Enum.into(%{})
 
-    # Check if weights changed
-    weight_changes = Enum.map(final_weights, fn {name, value} ->
-      original = Map.get(initial_weights, name, 0.0)
-      {name, value - original}
-    end) |> Enum.into(%{})
-
-    IO.puts("DEBUG: Weight changes: #{inspect(weight_changes)}")
-
-    # Check for zero updates
-    if Enum.all?(weight_changes, fn {_, change} -> change == 0.0 end) do
-      IO.puts("WARNING: No weight changes occurred during training!")
+      if weight_changes == %{} do
+        IO.puts("WARNING: No significant weight changes occurred during training!")
+      else
+        IO.puts("Top weight changes: #{inspect(weight_changes)}")
+      end
     end
 
     # Create a new classifier with the trained model
-    TextData.classifier(trained_model, vocabulary, categories, config)
+    TextClassifier.classifier(trained_model, vocabulary, categories, config)
   end
 
   @doc """
@@ -482,8 +479,16 @@ defmodule TextClassifier do
     categories = classifier.categories
     config = classifier.config
 
+    debug_enabled = System.get_env("DEBUG_META_LEARNING") == "true"
+
     # Extract features
     features = extract_features(text, vocabulary)
+
+    # Minimal feature logging
+    if debug_enabled do
+      feature_count = Enum.count(features, fn {k, _} -> k != :original_text && k != :valid_document end)
+      IO.puts("Classification with #{feature_count} matching features")
+    end
 
     # Get parameters (word weights)
     parameters = model.parameters
@@ -491,7 +496,10 @@ defmodule TextClassifier do
     # Calculate score for each category by applying category-specific weights
     scores =
       Enum.map(categories, fn category ->
-        # Score using a more sophisticated approach that properly handles positive/negative weights
+        # Get category-specific terms
+        category_terms = Map.get(config.key_terms, category, [])
+
+        # Score calculation with improved weighting logic
         base_score =
           Enum.reduce(parameters, 0, fn param, acc ->
             name = param.name
@@ -500,52 +508,106 @@ defmodule TextClassifier do
 
             # Skip words that don't appear in this document
             if word_count > 0 do
-              # Multiply word count by its weight
-              acc + word_count * weight
+              # Apply different weight multipliers based on word characteristics
+              multiplier = cond do
+                # Key term for this category - higher weight
+                name in category_terms -> 2.0
+                # Known negative term
+                name in ["bad", "terrible", "hate", "awful", "poor"] &&
+                  !String.contains?(String.downcase(category), "negative") -> 0.5
+                # Known positive term
+                name in ["good", "excellent", "love", "wonderful", "great"] &&
+                  String.contains?(String.downcase(category), "positive") -> 2.0
+                # Default multiplier
+                true -> 1.0
+              end
+
+              # Multiply word count by its weight and the multiplier
+              acc + word_count * weight * multiplier
             else
               acc
             end
           end)
 
-        # Apply category-specific boosting
-        category_terms = Map.get(config.key_terms, category, [])
-        category_boost = 0
-
-        # Add extra weight for category-specific terms that appear in the document
+        # Apply category-specific boosting from config
         category_multiplier = Map.get(config.boost_weights, :category_multiplier, 1.5)
 
-        category_specific_score =
-          Enum.reduce(category_terms, 0, fn term, acc ->
-            word_count = Map.get(features, term, 0)
-
-            if word_count > 0 do
-              # Add category-specific boost
-              acc + word_count * category_multiplier
+        # Calculate special handling for negations if present
+        negation_adjustment =
+          if Map.get(features, :original_text) &&
+             String.contains?(Map.get(features, :original_text), "not ") do
+            # If negation present, adjust scores for sentiment categories
+            if String.contains?(String.downcase(category), "positive") do
+              -base_score * 0.5  # Reduce positive scores
+            else if String.contains?(String.downcase(category), "negative") do
+              base_score * 0.3   # Boost negative scores
             else
-              acc
+              0.0
             end
-          end)
+            end
+          else
+            0.0
+          end
 
-        final_score = base_score + category_specific_score
+        # Add context-based adjustments
+        context_adjustment = calculate_context_adjustment(features, category, base_score)
 
-        # For negative sentiment categories, properly handle negative weights
-        if String.contains?(String.downcase(category), "negative") do
-          # For negative categories, negative words should increase score
-          {category,
-           final_score +
-             Enum.sum(
-               for {term, count} <- features,
-                   count > 0,
-                   term in ["bad", "slow", "poor", "delay"],
-                   do: count * Map.get(config.boost_weights, :negative_match, 0.2) * -10
-             )}
-        else
-          {category, final_score}
-        end
+        # Calculate final score with all adjustments
+        final_score = base_score + negation_adjustment + context_adjustment
+
+        # Return category with its score
+        {category, final_score}
       end)
 
     # Return category with highest score
     Enum.max_by(scores, fn {_category, score} -> score end)
+  end
+
+  # Helper for context-based score adjustments
+  def calculate_context_adjustment(features, category, base_score) do
+    original_text = Map.get(features, :original_text, "")
+
+    cond do
+      # Quality context
+      String.contains?(original_text, "quality") ->
+        if String.contains?(String.downcase(category), "quality") do
+          base_score * 0.3  # Boost quality category
+        else
+          0.0
+        end
+
+      # Price context
+      String.contains?(original_text, "price") || String.contains?(original_text, "cost") ->
+        if String.contains?(original_text, "cheap") || String.contains?(original_text, "affordable") do
+          if String.contains?(String.downcase(category), "positive") do
+            base_score * 0.25  # Boost positive for good price
+          else
+            0.0
+          end
+        else
+          if String.contains?(original_text, "expensive") do
+            if String.contains?(String.downcase(category), "negative") do
+              base_score * 0.25  # Boost negative for bad price
+            else
+              0.0
+            end
+          else
+            0.0
+          end
+        end
+
+      # Service context
+      String.contains?(original_text, "service") || String.contains?(original_text, "support") ->
+        if String.contains?(String.downcase(category), "service") do
+          base_score * 0.3  # Boost service category
+        else
+          0.0
+        end
+
+      # Default - no adjustment
+      true ->
+        0.0
+    end
   end
 
   @doc """
