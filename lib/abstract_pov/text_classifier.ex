@@ -311,21 +311,55 @@ defmodule TextClassifier do
   Processes a document, extracting features for the classifier
   """
   def extract_features(document, vocabulary) do
-    # Tokenize text
+    # Extract text, handling both string and map inputs
+    text = cond do
+      is_binary(document) -> document
+      is_map(document) && Map.has_key?(document, :text) -> document.text
+      is_map(document) && Map.has_key?(document, :original_text) -> document.original_text
+      true -> ""
+    end
+
+    # Ensure we have text to process
+    text = if text == "", do: "empty", else: text
+
+    IO.puts("DEBUG: Extracting features from text: #{inspect(text)}")
+
+    # Tokenize text - added better tokenization
     words =
-      document
+      text
       |> String.downcase()
-      |> String.replace(~r/[^\w\s]/, "")
+      |> String.replace(~r/[^\w\s]/, " ")  # Replace punctuation with spaces
       |> String.split(~r/\s+/)
+      |> Enum.filter(&(&1 != ""))  # Remove empty strings
+
+    IO.puts("DEBUG: Tokenized words: #{inspect(words)}")
+    IO.puts("DEBUG: Vocabulary to match: #{inspect(vocabulary)}")
 
     # Count occurrences of vocabulary words
     features =
       Enum.reduce(vocabulary, %{}, fn word, acc ->
         count = Enum.count(words, &(&1 == word))
-        Map.put(acc, word, count)
+        # Only add words that actually appear
+        if count > 0 do
+          IO.puts("DEBUG: Found word '#{word}' with count #{count}")
+          Map.put(acc, word, count)
+        else
+          acc
+        end
       end)
 
-    features
+    IO.puts("DEBUG: Extracted features: #{inspect(features)}")
+
+    # Preserve original text if available
+    features =
+      if is_map(document) && Map.has_key?(document, :original_text) do
+        Map.put(features, :original_text, document.original_text)
+      else
+        features
+      end
+
+    # Add flag to indicate this is a real document (not empty)
+    Map.put(features, :valid_document, true)
   end
 
   @doc """
@@ -338,11 +372,53 @@ defmodule TextClassifier do
     categories = classifier.categories
     config = classifier.config
 
+    IO.puts("DEBUG: Training classifier with #{length(documents)} documents for #{epochs} epochs")
+
     # Convert documents to dataset
     dataset = prepare_dataset(documents, vocabulary)
+    IO.puts("DEBUG: Dataset prepared with #{length(dataset.data_points)} data points")
+
+    # Debug the first data point
+    if length(dataset.data_points) > 0 do
+      first_point = List.first(dataset.data_points)
+      IO.puts("DEBUG: First data point - Label: #{inspect(first_point.label)}, Features: #{inspect(first_point.features)}")
+    end
+
+    # Get initial weights for comparison
+    initial_weights = Enum.map(model.parameters, fn
+      %{name: name, value: value} -> {name, value}
+      param -> {param[:name], param[:value]}
+    end) |> Enum.into(%{})
+
+    IO.puts("DEBUG: Initial weights: #{inspect(initial_weights)}")
 
     # Train using the meta-learning system
     trained_model = MetaLearning.train(model, dataset, epochs)
+
+    # Debug parameter changes
+    IO.puts("DEBUG: Initial param count: #{length(model.parameters)}")
+    IO.puts("DEBUG: Trained param count: #{length(trained_model.parameters)}")
+
+    # Get final weights
+    final_weights = Enum.map(trained_model.parameters, fn
+      %{name: name, value: value} -> {name, value}
+      param -> {param[:name], param[:value]}
+    end) |> Enum.into(%{})
+
+    IO.puts("DEBUG: Final weights: #{inspect(final_weights)}")
+
+    # Check if weights changed
+    weight_changes = Enum.map(final_weights, fn {name, value} ->
+      original = Map.get(initial_weights, name, 0.0)
+      {name, value - original}
+    end) |> Enum.into(%{})
+
+    IO.puts("DEBUG: Weight changes: #{inspect(weight_changes)}")
+
+    # Check for zero updates
+    if Enum.all?(weight_changes, fn {_, change} -> change == 0.0 end) do
+      IO.puts("WARNING: No weight changes occurred during training!")
+    end
 
     # Create a new classifier with the trained model
     TextData.classifier(trained_model, vocabulary, categories, config)
@@ -355,17 +431,35 @@ defmodule TextClassifier do
     # Convert documents to data points
     data_points =
       Enum.map(documents, fn doc ->
-        fold doc do
-          case(document(text, features, category)) ->
-            # Extract features
-            features = extract_features(text, vocabulary)
+        # Extract features based on document structure
+        features = cond do
+          is_map(doc) && Map.has_key?(doc, :text) && Map.has_key?(doc, :category) ->
+            feats = extract_features(doc.text, vocabulary)
+            # Add category to features for easier access
+            Map.put(feats, :category, doc.category)
 
-            # Add category to features for the heuristics
-            features_with_category = Map.put(features, :category, category)
+          is_map(doc) && Map.has_key?(doc, :features) && Map.has_key?(doc, :category) ->
+            # Use existing features if already provided
+            feats = doc.features
+            # Add category if not already present
+            Map.put(feats, :category, doc.category)
 
-            # Create data point
-            MetaLearning.new_data_point(features_with_category, category)
+          is_map(doc) && Map.has_key?(doc, :variant) && doc.variant == :document ->
+            # For document type from TextData
+            text = Map.get(doc, :text, "")
+            feats = extract_features(text, vocabulary)
+            # Add original features if available
+            feats = Map.merge(Map.get(doc, :features, %{}), feats)
+            # Add category to features for easier access
+            Map.put(feats, :category, doc.category)
+
+          true ->
+            # Default handling
+            %{category: "unknown"}
         end
+
+        # Create data point with the label set to the category
+        MetaLearning.new_data_point(features, features.category)
       end)
 
     # Create dataset with initial statistics

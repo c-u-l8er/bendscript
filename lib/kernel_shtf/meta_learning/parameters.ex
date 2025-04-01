@@ -111,24 +111,46 @@ defmodule KernelShtf.MetaLearning.Parameters do
             result = execute_action(action, name, value, update_rate, dataset)
 
             # Scale update by confidence level and learning rate
-            current_value = elem(result, 0)
-            current_dataset = elem(result, 1)
+            {raw_delta, current_dataset} = result
 
-            scaled_value = value + (current_value - value) * confidence * update_rate
+            # Ensure we have a numeric value for the delta
+            delta = cond do
+              is_number(raw_delta) -> raw_delta
+              is_tuple(raw_delta) && tuple_size(raw_delta) == 2 && is_number(elem(raw_delta, 0)) ->
+                elem(raw_delta, 0)
+              true -> 0.0
+            end
 
-            {scaled_value, current_dataset}
+            # Apply significant update to ensure learning happens
+            new_value = value + delta * confidence * update_rate
+
+            # Ensure we track parameter updates
+            updated_dataset = store_parameter_update(name, delta, current_dataset)
+
+            {new_value, updated_dataset}
 
           # If action is a map, handle it accordingly
           is_map(action) ->
             result = execute_action(action, name, value, update_rate, dataset)
 
             # Scale update by confidence level and learning rate
-            current_value = elem(result, 0)
-            current_dataset = elem(result, 1)
+            {raw_delta, current_dataset} = result
 
-            scaled_value = value + (current_value - value) * confidence * update_rate
+            # Ensure we have a numeric value for the delta
+            delta = cond do
+              is_number(raw_delta) -> raw_delta
+              is_tuple(raw_delta) && tuple_size(raw_delta) == 2 && is_number(elem(raw_delta, 0)) ->
+                elem(raw_delta, 0)
+              true -> 0.0
+            end
 
-            {scaled_value, current_dataset}
+            # Apply update
+            new_value = value + delta * confidence * update_rate
+
+            # Ensure we track parameter updates
+            updated_dataset = store_parameter_update(name, delta, current_dataset)
+
+            {new_value, updated_dataset}
 
           # For any other action type
           true ->

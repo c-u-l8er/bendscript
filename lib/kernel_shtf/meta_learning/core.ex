@@ -40,26 +40,36 @@ defmodule KernelShtf.MetaLearning.Core do
   end
 
   def learn_epoch(model, dataset) do
+    IO.puts("DEBUG: Starting learn_epoch")
     # Extract batches from dataset
     batches = Batching.create_batches(dataset)
+    IO.puts("DEBUG: Created #{length(batches)} batches")
 
     # Learn from each batch sequentially
     {final_model, updated_batches} =
       Enum.reduce(batches, {model, []}, fn batch, {current_model, processed_batches} ->
-        fold current_model, with: batch do
-          case(model(parameters, heuristics, meta_rules)) ->
-            # Apply heuristics to determine how to update parameters
-            {updated_parameters, updated_batch} =
-              Heuristics.apply_heuristics(parameters, heuristics, batch)
+        # Direct map access for model structure
+        parameters = current_model.parameters
+        heuristics = current_model.heuristics
+        meta_rules = current_model.meta_rules
 
-            # Track learning statistics to update dataset
-            updated_batch =
-              Batching.update_statistics(updated_batch, parameters, updated_parameters)
+        IO.puts("DEBUG: Processing batch with #{length(batch[:data_subset] || [])} data points")
 
-            # Save the updated batch
-            {Learning.model(updated_parameters, heuristics, meta_rules),
-             [updated_batch | processed_batches]}
-        end
+        # Apply heuristics to determine how to update parameters
+        {updated_parameters, updated_batch} =
+          Heuristics.apply_heuristics(parameters, heuristics, batch)
+
+        # Check if parameters were actually updated
+        param_changed = parameters != updated_parameters
+        IO.puts("DEBUG: Parameters changed: #{param_changed}")
+
+        # Track learning statistics to update dataset
+        updated_batch =
+          Batching.update_statistics(updated_batch, parameters, updated_parameters)
+
+        # Save the updated batch
+        {%{current_model | parameters: updated_parameters},
+         [updated_batch | processed_batches]}
       end)
 
     # Merge batch statistics back into the dataset
