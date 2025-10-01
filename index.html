@@ -18,8 +18,8 @@
             min-height: 100vh;
             overflow-x: hidden;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
         }
 
         .background {
@@ -349,79 +349,80 @@
 </head>
 <body>
     <div class="background" id="background"></div>
-    
-    <div class="container">
-        <div class="logo-container">
-            <div class="orbit-container">
-                <div class="orbit orbit-1"></div>
-                <div class="orbit orbit-2"></div>
+
+    <div class="content-wrapper" style="flex: 1; display: flex; align-items: center; justify-content: center;">
+        <div class="container">
+            <div class="logo-container">
+                <div class="orbit-container">
+                    <div class="orbit orbit-1"></div>
+                    <div class="orbit orbit-2"></div>
+                </div>
+
+                <div class="powered-by">
+                    Powered by <a href="https://c-u-l8er.link" target="_blank">C U L8er</a>
+                </div>
+
+                <div class="nucleus">
+                    <div class="logo">
+                        <span class="electron-b">b</span><span class="energy-nucleus">EN</span><span class="electron-d">d</span><span class="script-text">Script</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="powered-by">
-                Powered by <a href="https://c-u-l8er.link" target="_blank">C U L8er</a>
+            <div class="tagline">
+                ⟨ Energy Nucleus Technologies ⟩
             </div>
 
-            <div class="nucleus">
-                <div class="logo">
-                    <span class="electron-b">b</span><span class="energy-nucleus">EN</span><span class="electron-d">d</span><span class="script-text">Script</span>
+            <div class="description">
+                Where booleans orbit the <strong style="color: #ff00ff;">Energy Nucleus</strong>, 
+                consciousness meets code. <strong style="color: #00ccff;">BendScript</strong> bridges 
+                the quantum realm with technological innovation—creating tools that bend reality through 
+                the power of focused intention and secure protocols.
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">⚛️</div>
+                    <div class="feature-title">Quantum Consciousness</div>
+                    <div class="feature-desc">Boolean flip dynamics powering next-gen applications</div>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🔐</div>
+                    <div class="feature-title">Secure Protocols</div>
+                    <div class="feature-desc">Military-grade encryption for inner transformation</div>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🌌</div>
+                    <div class="feature-title">Reality Bending</div>
+                    <div class="feature-desc">Technology that manifests thought into form</div>
+                </div>
+            </div>
+
+            <div class="projects-section">
+                <div class="section-title">⟨⟨⟨ Featured Technology ⟩⟩⟩</div>
+                
+                <div class="project-card">
+                    <div class="project-title">SSH</div>
+                    <div class="project-subtitle">Secure Self-Hypnosis Protocol</div>
+                    <div class="project-description">
+                        A revolutionary web portal combining ancient consciousness practices with modern technology. 
+                        Access your multidimensional self, manifest intentions through the quantum field, and tap 
+                        into 33° wisdom—all through secure, encrypted sessions that protect your inner journey.
+                        <br><br>
+                        <strong style="color: #00ff88;">Features:</strong>
+                        <br>
+                        ⟨ Time Bridge Protocol ⟩ Connect with past selves
+                        <br>
+                        ⟨ Manifestation Engine ⟩ Thought → Reality transmission
+                        <br>
+                        ⟨ Deep State Access ⟩ Theta consciousness gateway
+                    </div>
+                    <a href="https://ssh.bendscript.com" class="cta-button">Enter SSH Portal</a>
                 </div>
             </div>
         </div>
-
-        <div class="tagline">
-            ⟨ Energy Nucleus Technologies ⟩
-        </div>
-
-        <div class="description">
-            Where booleans orbit the <strong style="color: #ff00ff;">Energy Nucleus</strong>, 
-            consciousness meets code. <strong style="color: #00ccff;">BendScript</strong> bridges 
-            the quantum realm with technological innovation—creating tools that bend reality through 
-            the power of focused intention and secure protocols.
-        </div>
-
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">⚛️</div>
-                <div class="feature-title">Quantum Consciousness</div>
-                <div class="feature-desc">Boolean flip dynamics powering next-gen applications</div>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">🔐</div>
-                <div class="feature-title">Secure Protocols</div>
-                <div class="feature-desc">Military-grade encryption for inner transformation</div>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">🌌</div>
-                <div class="feature-title">Reality Bending</div>
-                <div class="feature-desc">Technology that manifests thought into form</div>
-            </div>
-        </div>
-
-        <div class="projects-section">
-            <div class="section-title">⟨⟨⟨ Featured Technology ⟩⟩⟩</div>
-            
-            <div class="project-card">
-                <div class="project-title">SSH</div>
-                <div class="project-subtitle">Secure Self-Hypnosis Protocol</div>
-                <div class="project-description">
-                    A revolutionary web portal combining ancient consciousness practices with modern technology. 
-                    Access your multidimensional self, manifest intentions through the quantum field, and tap 
-                    into 33° wisdom—all through secure, encrypted sessions that protect your inner journey.
-                    <br><br>
-                    <strong style="color: #00ff88;">Features:</strong>
-                    <br>
-                    ⟨ Time Bridge Protocol ⟩ Connect with past selves
-                    <br>
-                    ⟨ Manifestation Engine ⟩ Thought → Reality transmission
-                    <br>
-                    ⟨ Deep State Access ⟩ Theta consciousness gateway
-                </div>
-                <a href="https://ssh.bendscript.com" class="cta-button">Enter SSH Portal</a>
-            </div>
-        </div>
-
     </div>
 
     <script>
@@ -464,5 +465,23 @@
             nucleus.style.transform = `scale(${1 + Math.sin(Date.now() / 500) * 0.1})`;
         }, 50);
     </script>
+
+    <div style="background: #000; padding: 2em 0 1em; width: 100%; z-index: 1;">
+        <div style="margin: 0 auto; width: 728px;">
+            <iframe
+                src="https://ampersandboxdesign.com/advertisements/leaderboard-watermark.html"
+                width="728"
+                height="90"
+                frameborder="0"
+                scrolling="no"
+                style="border:none; overflow:hidden;"
+                title="AmperSandboxDesign Branding Design Agency Advertisement"
+            >
+            </iframe>
+            <div style="text-align: right; color: #ccc; font-size: 0.75em;">
+                ^ADVERTISEMENT
+            </div>
+        </div>
+    </div>
 </body>
 </html>
